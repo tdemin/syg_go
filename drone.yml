@@ -1,0 +1,18 @@
+kind: pipeline
+name: build & release
+
+steps:
+- name: fetch
+  image: docker:git
+  commands:
+    - git fetch --tags
+- name: release
+  image: golang
+  environment:
+    GITEA_TOKEN:
+      from_secret: goreleaser_gitea_token
+  commands:
+    - curl -sL https://git.io/goreleaser | bash
+  when:
+    event: tag
+
