@@ -1,7 +1,7 @@
 package main
 
 /*
-Parts of this file are taken from yggdrasil-go, located at
+Parts of this program are taken from yggdrasil-go, located at
 https://github.com/yggdrasil-network/yggdrasil-go
 
 See cmd/genkeys/main.go@78b5f88e4bb734d0dd6a138ff08d34ca39dcaea3
@@ -20,11 +20,19 @@ import (
 	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
+var version = "v0.1.0"
+
 func main() {
 	rxflag := flag.String("regex", "::", "regex to match addresses against")
 	threads := flag.Int("threads", runtime.GOMAXPROCS(0), "how many threads to use for mining")
 	iterationsPerOutput := flag.Uint("iter", 100000, "per how many iterations to output status")
+	displayVersion := flag.Bool("version", false, "display version")
 	flag.Parse()
+	if *displayVersion {
+		println("syg_go", version)
+		return
+	}
+
 	regex, err := regexp.Compile(*rxflag)
 	if err != nil {
 		log.Printf("%v\n", err)
