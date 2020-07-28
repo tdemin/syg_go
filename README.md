@@ -34,6 +34,21 @@ With 8 threads on Ryzen 1700X while searching for `::` this program reaches:
 * 100 000 000 iterations in 25 minutes, 58 seconds
 * 500 000 000 iterations in 2 hours, 10 minutes
 
+### Usage
+
+```
+% syg_go -help
+Usage of syg_go:
+  -iter uint
+        per how many iterations to output status (default 100000)
+  -regex string
+        regex to match addresses against (default "::")
+  -threads int
+        how many threads to use for mining (default 16)
+  -version
+        display version
+```
+
 ### License
 
 See [LICENSE](LICENSE).
