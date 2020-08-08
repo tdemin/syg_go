@@ -16,6 +16,7 @@ import (
 	"regexp"
 	"runtime"
 
+	"github.com/yggdrasil-network/yggdrasil-go/src/address"
 	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
@@ -26,10 +27,19 @@ func main() {
 	threads := flag.Int("threads", runtime.GOMAXPROCS(0), "how many threads to use for mining")
 	iterationsPerOutput := flag.Uint("iter", 100000, "per how many iterations to output status")
 	displayVersion := flag.Bool("version", false, "display version")
+	origCode := flag.Bool("original", false, "use original Yggdrasil code")
 	flag.Parse()
 	if *displayVersion {
 		println("syg_go", version)
 		return
+	}
+
+	if *origCode {
+		log.Println("using unmodified Yggdrasil code")
+		addrForNodeID = address.AddrForNodeID
+	} else {
+		log.Println("using syg_go vendored code")
+		addrForNodeID = AddrForNodeID
 	}
 
 	regex, err := regexp.Compile(*rxflag)
