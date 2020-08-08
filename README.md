@@ -7,6 +7,10 @@ code for generating keys and utilizing multiple CPU threads for mining.
 
 `% go get -u -v git.tdem.in/tdemin/syg_go`
 
+This program contains some modded code from Yggdrasil that aims to improve
+performance. If you prefer to use original Yggdrasil code, set `-tags original`
+flag in the command above.
+
 ### History
 
 SimpleYggGen is originally a project by [@acetone](https://notabug.org/acetone),

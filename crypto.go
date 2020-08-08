@@ -5,6 +5,11 @@ import (
 	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
+// custom function selectors, see crypto_xxx.go
+var (
+	addrForNodeID func(*crypto.NodeID) *address.Address
+)
+
 // AddrForNodeID is a variant of Yggdrasil's src/address.AddrForNodeID that
 // might be slightly optimized for performance.
 //
