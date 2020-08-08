@@ -2,12 +2,22 @@ kind: pipeline
 name: build & release
 
 steps:
-- name: fetch
+- name: fetch tags
   image: docker:git
   commands:
     - git fetch --tags
+  when:
+    event: tag
+- name: test
+  image: golang:1.14-alpine
+  commands:
+    - go test -v .
+  when:
+    event:
+      exclude:
+      - tag
 - name: release
-  image: golang
+  image: golang:1.14-alpine
   environment:
     GITEA_TOKEN:
       from_secret: goreleaser_gitea_token
