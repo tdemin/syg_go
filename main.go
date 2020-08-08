@@ -16,7 +16,6 @@ import (
 	"regexp"
 	"runtime"
 
-	"github.com/yggdrasil-network/yggdrasil-go/src/address"
 	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
@@ -74,7 +73,7 @@ func doBoxKeys(out chan<- keySet) {
 	for {
 		pub, priv := crypto.NewBoxKeys()
 		id := crypto.GetNodeID(pub)
-		ip := net.IP(address.AddrForNodeID(id)[:]).String()
+		ip := net.IP(AddrForNodeID(id)[:]).String()
 		out <- keySet{priv[:], pub[:], id[:], ip}
 	}
 }
