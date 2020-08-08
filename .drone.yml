@@ -9,7 +9,7 @@ steps:
   when:
     event: tag
 - name: test
-  image: golang:1.14-alpine
+  image: golang:1.14
   commands:
     - go test -v .
   when:
@@ -17,7 +17,7 @@ steps:
       exclude:
       - tag
 - name: release
-  image: golang:1.14-alpine
+  image: golang:1.14
   environment:
     GITEA_TOKEN:
       from_secret: goreleaser_gitea_token
