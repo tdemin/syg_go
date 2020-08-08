@@ -34,6 +34,27 @@ With 8 threads on Ryzen 1700X while searching for `::` this program reaches:
 * 100 000 000 iterations in 25 minutes, 58 seconds
 * 500 000 000 iterations in 2 hours, 10 minutes
 
+This program contains some modded code from Yggdrasil that aims to improve
+performance. If you prefer to use original Yggdrasil code, set `-original`
+flag.
+
+### Usage
+
+```
+% syg_go -help
+Usage of syg_go:
+  -iter uint
+        per how many iterations to output status (default 100000)
+  -original
+        use original Yggdrasil code
+  -regex string
+        regex to match addresses against (default "::")
+  -threads int
+        how many threads to use for mining (default 16)
+  -version
+        display version
+```
+
 ### License
 
 See [LICENSE](LICENSE).

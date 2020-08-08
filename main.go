@@ -20,17 +20,26 @@ import (
 	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
-var version = "v0.1.0"
+var version = "v0.1.1"
 
 func main() {
 	rxflag := flag.String("regex", "::", "regex to match addresses against")
 	threads := flag.Int("threads", runtime.GOMAXPROCS(0), "how many threads to use for mining")
 	iterationsPerOutput := flag.Uint("iter", 100000, "per how many iterations to output status")
 	displayVersion := flag.Bool("version", false, "display version")
+	origCode := flag.Bool("original", false, "use original Yggdrasil code")
 	flag.Parse()
 	if *displayVersion {
 		println("syg_go", version)
 		return
+	}
+
+	if *origCode {
+		log.Println("using unmodified Yggdrasil code")
+		addrForNodeID = address.AddrForNodeID
+	} else {
+		log.Println("using syg_go vendored code")
+		addrForNodeID = AddrForNodeID
 	}
 
 	regex, err := regexp.Compile(*rxflag)
@@ -74,7 +83,7 @@ func doBoxKeys(out chan<- keySet) {
 	for {
 		pub, priv := crypto.NewBoxKeys()
 		id := crypto.GetNodeID(pub)
-		ip := net.IP(address.AddrForNodeID(id)[:]).String()
+		ip := net.IP(addrForNodeID(id)[:]).String()
 		out <- keySet{priv[:], pub[:], id[:], ip}
 	}
 }

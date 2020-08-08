@@ -1,5 +1,5 @@
 builds:
-- main: main.go
+- main: .
   env:
   - CGO_ENABLED=0
   goos:
