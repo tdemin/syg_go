@@ -9,19 +9,20 @@ code for generating keys and utilizing multiple CPU threads for mining.
 
 ### History
 
-SimpleYggGen is originally a project by [@acetone](https://notabug.org/acetone),
-who wrote a bash [miner](https://notabug.org/acetone/SimpleYggGen-Bash) for
+[SimpleYggGen](https://notabug.org/acetone/SimpleYggGen-Bash) is originally a
+project by [@acetone](https://notabug.org/acetone), who wrote a Bash miner for
 getting "magic" Yggdrasil addresses following a pattern. The main problem with
 his implementation was that it ran grep and yggdrasil as separate processes,
-making mining very slow. Even though acetone later made a C++ implementation, it
-still relies on running Yggdrasil as a separate process.
+making mining very slow. Even though @acetone later made a C++ implementation,
+it still relied on running Yggdrasil as a separate process.
+
+As of now (2020-08-12) @acetone reworked his C++ miner implementation, and
+[SYG-C++](https://notabug.org/acetone/SimpleYggGen-CPP) is even more performant
+than this program (making, like, 15% more iterations within the same time).
 
 ### Performance
 
-Obviously far superior to the [original SimpleYggGen][dokuygg]
-(Yggdrasil link, you might need to install Yggdrasil to open this link).
-
-[dokuygg]: http://[300:529f:150c:eafe::6]/doku.php?id=yggdrasil:simpleygggen
+Obviously far superior to the original SimpleYggGen.
 
 With multiple threads it takes SimpleYggGen **a month** to run through a few
 million cycles and find keys for `200::c84:77b0:f66d:b47e:64c7` (targeting
