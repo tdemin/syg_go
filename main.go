@@ -28,6 +28,7 @@ func main() {
 	iterationsPerOutput := flag.Uint("iter", 100000, "per how many iterations to output status")
 	displayVersion := flag.Bool("version", false, "display version")
 	origCode := flag.Bool("original", false, "use original Yggdrasil code")
+	highAddressMode := flag.Bool("highaddr", false, "high address mining mode (2xx::), excludes regex")
 	flag.Parse()
 	if *displayVersion {
 		println("syg_go", version)
@@ -42,10 +43,18 @@ func main() {
 		addrForNodeID = AddrForNodeID
 	}
 
-	regex, err := regexp.Compile(*rxflag)
-	if err != nil {
-		log.Printf("%v\n", err)
-		os.Exit(1)
+	var (
+		regex *regexp.Regexp
+		err   error
+	)
+	if !*highAddressMode {
+		regex, err = regexp.Compile(*rxflag)
+		if err != nil {
+			log.Printf("%v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		regex = regexp.MustCompile("^2..::$")
 	}
 
 	newKeys := make(chan keySet, *threads)

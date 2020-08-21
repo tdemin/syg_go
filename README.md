@@ -44,6 +44,8 @@ flag.
 ```
 % syg_go -help
 Usage of syg_go:
+  -highaddr
+        high address mining mode (2xx::), excludes regex
   -iter uint
         per how many iterations to output status (default 100000)
   -original
