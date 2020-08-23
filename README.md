@@ -9,6 +9,11 @@ threads for mining.
 
 `% go get -u -v git.tdem.in/tdemin/syg_go`
 
+If you're an Arch Linux user, you can install it from
+[AUR](https://aur.archlinux.org/packages/syg_go/):
+
+`% yay -S syg_go`
+
 ### History
 
 [SimpleYggGen](https://notabug.org/acetone/SimpleYggGen-Bash) is originally a
