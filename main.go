@@ -50,21 +50,15 @@ func main() {
 	}
 
 	newKeys := make(chan keySet, *threads)
-	var (
-		threadChannels []chan []byte
-		currentBest    []byte
-	)
+	var currentBest []byte
+
 	if !*highAddressMode {
 		log.Printf("starting mining for %v with %v threads\n", regex, *threads)
-		for i := 0; i < *threads; i++ {
-			go doBoxKeys(newKeys)
-		}
 	} else {
 		log.Printf("starting mining higher addresses with %v threads\n", *threads)
-		for i := 0; i < *threads; i++ {
-			threadChannels = append(threadChannels, make(chan []byte, *threads))
-			go doBoxKeysHighAddr(newKeys, threadChannels[i])
-		}
+	}
+	for i := 0; i < *threads; i++ {
+		go doBoxKeys(newKeys)
 	}
 
 	counter := uint64(0)
@@ -85,12 +79,11 @@ func main() {
 			newKey := <-newKeys
 			if isBetter(currentBest[:], newKey.id) || len(currentBest) == 0 {
 				currentBest = newKey.id
-				for _, channel := range threadChannels {
-					select {
-					case channel <- newKey.id:
-					}
-				}
 				newKey.print()
+			}
+			counter++
+			if counter%i == 0 {
+				log.Printf("reached %v iterations\n", counter)
 			}
 		}
 	}
@@ -130,25 +123,4 @@ func isBetter(oldID, newID []byte) bool {
 		}
 	}
 	return false
-}
-
-func doBoxKeysHighAddr(out chan<- keySet, in <-chan []byte) {
-	var bestID crypto.NodeID
-	for {
-		select {
-		case newBestID := <-in:
-			if isBetter(bestID[:], newBestID) {
-				copy(bestID[:], newBestID)
-			}
-		default:
-			pub, priv := crypto.NewBoxKeys()
-			id := crypto.GetNodeID(pub)
-			if !isBetter(bestID[:], id[:]) {
-				continue
-			}
-			bestID = *id
-			ip := net.IP(address.AddrForNodeID(id)[:]).String()
-			out <- keySet{priv[:], pub[:], id[:], ip}
-		}
-	}
 }
