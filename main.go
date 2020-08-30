@@ -1,7 +1,7 @@
 package main
 
 /*
-Parts of this program are taken from yggdrasil-go, located at
+This program is largely based on cmd/genkeys from yggdrasil-go, located at
 https://github.com/yggdrasil-network/yggdrasil-go
 
 See cmd/genkeys/main.go@78b5f88e4bb734d0dd6a138ff08d34ca39dcaea3
