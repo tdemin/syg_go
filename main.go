@@ -20,7 +20,7 @@ import (
 	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
-var version = "v0.1.2"
+var version = "v0.1.3"
 
 func main() {
 	rxflag := flag.String("regex", "::", "regex to match addresses against")
