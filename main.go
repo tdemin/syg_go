@@ -28,7 +28,7 @@ func main() {
 	iterationsPerOutput := flag.Uint("iter", 100000, "per how many iterations to output status")
 	displayVersion := flag.Bool("version", false, "display version")
 	origCode := flag.Bool("original", false, "use original Yggdrasil code")
-	highAddressMode := flag.Bool("highaddr", false, "high address mining mode (2xx::), excludes regex")
+	highAddressMode := flag.Bool("highaddr", false, "high address mining mode, excludes regex")
 	flag.Parse()
 	if *displayVersion {
 		println("syg_go", version)
@@ -43,40 +43,55 @@ func main() {
 		addrForNodeID = AddrForNodeID
 	}
 
-	var (
-		regex *regexp.Regexp
-		err   error
-	)
-	if !*highAddressMode {
-		regex, err = regexp.Compile(*rxflag)
-		if err != nil {
-			log.Printf("%v\n", err)
-			os.Exit(1)
-		}
-	} else {
-		regex = regexp.MustCompile("^2..::$")
+	regex, err := regexp.Compile(*rxflag)
+	if err != nil {
+		log.Printf("%v\n", err)
+		os.Exit(1)
 	}
 
 	newKeys := make(chan keySet, *threads)
-	log.Printf("starting mining for %v with %v threads\n", regex, *threads)
-	for i := 0; i < *threads; i++ {
-		go doBoxKeys(newKeys)
+	var (
+		threadChannels []chan []byte
+		currentBest    []byte
+	)
+	if !*highAddressMode {
+		log.Printf("starting mining for %v with %v threads\n", regex, *threads)
+		for i := 0; i < *threads; i++ {
+			go doBoxKeys(newKeys)
+		}
+	} else {
+		log.Printf("starting mining higher addresses with %v threads\n", *threads)
+		for i := 0; i < *threads; i++ {
+			threadChannels = append(threadChannels, make(chan []byte, *threads))
+			go doBoxKeysHighAddr(newKeys, threadChannels[i])
+		}
 	}
 
 	counter := uint64(0)
 	i := uint64(*iterationsPerOutput)
-	for {
-		newKey := <-newKeys
-		if regex.MatchString(newKey.ip) {
-			log.Printf("priv: %s | pub: %s | nodeid: %s | ip: %s\n",
-				hex.EncodeToString(newKey.priv[:]),
-				hex.EncodeToString(newKey.pub[:]),
-				hex.EncodeToString(newKey.id[:]),
-				newKey.ip)
+	if !*highAddressMode {
+		for {
+			newKey := <-newKeys
+			if regex.MatchString(newKey.ip) {
+				newKey.print()
+			}
+			counter++
+			if counter%i == 0 {
+				log.Printf("reached %v iterations\n", counter)
+			}
 		}
-		counter++
-		if counter%i == 0 {
-			log.Printf("reached %v iterations\n", counter)
+	} else {
+		for {
+			newKey := <-newKeys
+			if isBetter(currentBest[:], newKey.id) || len(currentBest) == 0 {
+				currentBest = newKey.id
+				for _, channel := range threadChannels {
+					select {
+					case channel <- newKey.id:
+					}
+				}
+				newKey.print()
+			}
 		}
 	}
 }
@@ -88,11 +103,52 @@ type keySet struct {
 	ip   string
 }
 
+func (k *keySet) print() {
+	log.Printf("priv: %s | pub: %s | nodeid: %s | ip: %s\n",
+		hex.EncodeToString(k.priv[:]),
+		hex.EncodeToString(k.pub[:]),
+		hex.EncodeToString(k.id[:]),
+		k.ip)
+}
+
 func doBoxKeys(out chan<- keySet) {
 	for {
 		pub, priv := crypto.NewBoxKeys()
 		id := crypto.GetNodeID(pub)
 		ip := net.IP(addrForNodeID(id)[:]).String()
 		out <- keySet{priv[:], pub[:], id[:], ip}
+	}
+}
+
+func isBetter(oldID, newID []byte) bool {
+	for i := range oldID {
+		if newID[i] > oldID[i] {
+			return true
+		}
+		if newID[i] < oldID[i] {
+			return false
+		}
+	}
+	return false
+}
+
+func doBoxKeysHighAddr(out chan<- keySet, in <-chan []byte) {
+	var bestID crypto.NodeID
+	for {
+		select {
+		case newBestID := <-in:
+			if isBetter(bestID[:], newBestID) {
+				copy(bestID[:], newBestID)
+			}
+		default:
+			pub, priv := crypto.NewBoxKeys()
+			id := crypto.GetNodeID(pub)
+			if !isBetter(bestID[:], id[:]) {
+				continue
+			}
+			bestID = *id
+			ip := net.IP(address.AddrForNodeID(id)[:]).String()
+			out <- keySet{priv[:], pub[:], id[:], ip}
+		}
 	}
 }
