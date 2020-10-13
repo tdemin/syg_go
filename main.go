@@ -20,7 +20,16 @@ import (
 	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
-var version = "v0.1.3"
+var (
+	programName = "syg_go"
+	version     = "v0.1.4"
+	copyright   = "Copyright (c) 2020 Timur Demin"
+)
+
+var (
+	stdout = log.New(os.Stdout, "", log.Flags())
+	stderr = log.New(os.Stderr, "", log.Flags())
+)
 
 func main() {
 	rxflag := flag.String("regex", "::", "regex to match addresses against")
@@ -31,21 +40,22 @@ func main() {
 	highAddressMode := flag.Bool("highaddr", false, "high address mining mode, excludes regex")
 	flag.Parse()
 	if *displayVersion {
-		println("syg_go", version)
+		println(programName, version)
+		println(copyright)
 		return
 	}
 
 	if *origCode {
-		log.Println("using unmodified Yggdrasil code")
+		stdout.Println("using unmodified Yggdrasil code")
 		addrForNodeID = address.AddrForNodeID
 	} else {
-		log.Println("using syg_go vendored code")
+		stdout.Println("using syg_go vendored code")
 		addrForNodeID = AddrForNodeID
 	}
 
 	regex, err := regexp.Compile(*rxflag)
 	if err != nil {
-		log.Printf("%v\n", err)
+		stderr.Printf("%v\n", err)
 		os.Exit(1)
 	}
 
@@ -53,9 +63,9 @@ func main() {
 	var currentBest []byte
 
 	if !*highAddressMode {
-		log.Printf("starting mining for %v with %v threads\n", regex, *threads)
+		stdout.Printf("starting mining for %v with %v threads\n", regex, *threads)
 	} else {
-		log.Printf("starting mining higher addresses with %v threads\n", *threads)
+		stdout.Printf("starting mining higher addresses with %v threads\n", *threads)
 	}
 	for i := 0; i < *threads; i++ {
 		go doBoxKeys(newKeys)
@@ -71,7 +81,7 @@ func main() {
 			}
 			counter++
 			if counter%i == 0 {
-				log.Printf("reached %v iterations\n", counter)
+				stderr.Printf("reached %v iterations\n", counter)
 			}
 		}
 	} else {
@@ -83,7 +93,7 @@ func main() {
 			}
 			counter++
 			if counter%i == 0 {
-				log.Printf("reached %v iterations\n", counter)
+				stderr.Printf("reached %v iterations\n", counter)
 			}
 		}
 	}
@@ -97,7 +107,7 @@ type keySet struct {
 }
 
 func (k *keySet) print() {
-	log.Printf("priv: %s | pub: %s | nodeid: %s | ip: %s\n",
+	stdout.Printf("priv: %s | pub: %s | nodeid: %s | ip: %s\n",
 		hex.EncodeToString(k.priv[:]),
 		hex.EncodeToString(k.pub[:]),
 		hex.EncodeToString(k.id[:]),

@@ -14,6 +14,39 @@ If you're an Arch Linux user, you can install it from
 
 `% yay -S syg_go`
 
+### Features
+
+* regex-based key mining (see `-regex`)
+* bruteforce-resistant keys mining mode (see `-highaddr`)
+* multithreaded key mining (see `-threads`)
+
+### Usage
+
+```
+% syg_go -help
+Usage of syg_go:
+  -highaddr
+        high address mining mode, excludes regex
+  -iter uint
+        per how many iterations to output status (default 100000)
+  -original
+        use original Yggdrasil code
+  -regex string
+        regex to match addresses against (default "::")
+  -threads int
+        how many threads to use for mining (default 16)
+  -version
+        display version
+```
+
+This program outputs keys found to stdout and iterations numbers reached
+to stderr so that users can redirect the (possibly) irrelevant status
+output to /dev/null. To redirect status output to /dev/null, run:
+
+```
+% syg_go ...flags... 2>/dev/null
+```
+
 ### History
 
 [SimpleYggGen](https://notabug.org/acetone/SimpleYggGen-Bash) is originally a
@@ -49,25 +82,6 @@ With 8 threads on Ryzen 1700X while searching for `::` this program reaches:
 This program contains some modded code from Yggdrasil that aims to improve
 performance. If you prefer to use original Yggdrasil code, set `-original`
 flag.
-
-### Usage
-
-```
-% syg_go -help
-Usage of syg_go:
-  -highaddr
-        high address mining mode, excludes regex
-  -iter uint
-        per how many iterations to output status (default 100000)
-  -original
-        use original Yggdrasil code
-  -regex string
-        regex to match addresses against (default "::")
-  -threads int
-        how many threads to use for mining (default 16)
-  -version
-        display version
-```
 
 ### Development
 
