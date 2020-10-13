@@ -23,6 +23,7 @@ import (
 var (
 	programName = "syg_go"
 	version     = "v0.1.3"
+	copyright   = "Copyright (c) 2020 Timur Demin"
 )
 
 var (
@@ -40,7 +41,7 @@ func main() {
 	flag.Parse()
 	if *displayVersion {
 		println(programName, version)
-		// TODO: add license and author information
+		println(copyright)
 		return
 	}
 
