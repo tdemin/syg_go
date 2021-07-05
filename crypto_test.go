@@ -1,28 +1,26 @@
 package main
 
 import (
+	"crypto/ed25519"
 	"net"
 	"os"
 	"regexp"
 	"testing"
 
 	"github.com/yggdrasil-network/yggdrasil-go/src/address"
-	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
 var (
-	testAddr   *address.Address
-	testPub    *crypto.BoxPubKey
-	testNodeID *crypto.NodeID
-	testRegex  *regexp.Regexp
+	testAddr  *address.Address
+	testPub   ed25519.PublicKey
+	testRegex *regexp.Regexp = regexp.MustCompile("::")
 )
 
-func TestAddrForNodeID(t *testing.T) {
-	for i := 20; i > 0; i-- {
-		pub, _ := crypto.NewBoxKeys()
-		id := crypto.GetNodeID(pub)
-		origIP := net.IP(address.AddrForNodeID(id)[:])
-		modIP := net.IP(AddrForNodeID(id)[:])
+func TestAddrForKey(t *testing.T) {
+	for i := 100000; i > 0; i-- {
+		pub, _ := GenerateKeyEd25519()
+		origIP := net.IP(address.AddrForKey(pub)[:])
+		modIP := net.IP(AddrForKey(pub)[:])
 		if !origIP.Equal(modIP) {
 			t.Errorf("got %s, expected %s", modIP, origIP)
 		}
@@ -30,30 +28,27 @@ func TestAddrForNodeID(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	testPub, _ = crypto.NewBoxKeys()
-	testNodeID = crypto.GetNodeID(testPub)
-	testRegex = regexp.MustCompile("::")
+	testPub, _ = GenerateKeyEd25519()
 	os.Exit(m.Run())
 }
 
-func BenchmarkOrigAddrForNodeID(b *testing.B) {
+func BenchmarkOrigAddrKey(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		testAddr = address.AddrForNodeID(testNodeID)
+		testAddr = address.AddrForKey(testPub)
 	}
 }
 
-func BenchmarkModdedAddrForNodeID(b *testing.B) {
+func BenchmarkModdedAddrForKey(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		testAddr = AddrForNodeID(testNodeID)
+		testAddr = AddrForKey(testPub)
 	}
 }
 
 // measures overall performance of code from cmd/genkeys
 func BenchmarkOrigLoop(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		pub, _ := crypto.NewBoxKeys()
-		id := crypto.GetNodeID(pub)
-		ip := net.IP(address.AddrForNodeID(id)[:]).String()
+		pub, _ := GenerateKeyEd25519()
+		ip := net.IP(address.AddrForKey(pub)[:]).String()
 		testRegex.MatchString(ip)
 	}
 }
@@ -61,9 +56,8 @@ func BenchmarkOrigLoop(b *testing.B) {
 // measures overall performance of functions we vendor
 func BenchmarkModdedLoop(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		pub, _ := crypto.NewBoxKeys()
-		id := crypto.GetNodeID(pub)
-		ip := net.IP(AddrForNodeID(id)[:]).String()
+		pub, _ := GenerateKey()
+		ip := net.IP(AddrForKey(pub)[:]).String()
 		testRegex.MatchString(ip)
 	}
 }

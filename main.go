@@ -8,6 +8,7 @@ See cmd/genkeys/main.go@78b5f88e4bb734d0dd6a138ff08d34ca39dcaea3
 */
 
 import (
+	"crypto/ed25519"
 	"encoding/hex"
 	"flag"
 	"log"
@@ -17,7 +18,6 @@ import (
 	"runtime"
 
 	"github.com/yggdrasil-network/yggdrasil-go/src/address"
-	"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
 )
 
 var (
@@ -47,10 +47,12 @@ func main() {
 
 	if *origCode {
 		stdout.Println("using unmodified Yggdrasil code")
-		addrForNodeID = address.AddrForNodeID
+		addrForKey = address.AddrForKey
+		generateKey = GenerateKeyEd25519
 	} else {
 		stdout.Println("using syg_go vendored code")
-		addrForNodeID = AddrForNodeID
+		addrForKey = AddrForKey
+		generateKey = GenerateKey
 	}
 
 	regex, err := regexp.Compile(*rxflag)
@@ -60,13 +62,11 @@ func main() {
 	}
 
 	newKeys := make(chan keySet, *threads)
-	var currentBest []byte
-
-	if !*highAddressMode {
-		stdout.Printf("starting mining for %v with %v threads\n", regex, *threads)
-	} else {
-		stdout.Printf("starting mining higher addresses with %v threads\n", *threads)
+	var currentBest = make(ed25519.PublicKey, ed25519.PublicKeySize)
+	for i := range currentBest {
+		currentBest[i] = 0xff
 	}
+
 	for i := 0; i < *threads; i++ {
 		go doBoxKeys(newKeys)
 	}
@@ -74,6 +74,7 @@ func main() {
 	counter := uint64(0)
 	i := uint64(*iterationsPerOutput)
 	if !*highAddressMode {
+		stdout.Printf("starting mining for %v with %v threads\n", regex, *threads)
 		for {
 			newKey := <-newKeys
 			if regex.MatchString(newKey.ip) {
@@ -85,10 +86,11 @@ func main() {
 			}
 		}
 	} else {
+		stdout.Printf("starting mining higher addresses with %v threads\n", *threads)
 		for {
 			newKey := <-newKeys
-			if isBetter(currentBest[:], newKey.id) || len(currentBest) == 0 {
-				currentBest = newKey.id
+			if isBetter(currentBest, newKey.pub) {
+				currentBest = newKey.pub
 				newKey.print()
 			}
 			counter++
@@ -102,34 +104,31 @@ func main() {
 type keySet struct {
 	priv []byte
 	pub  []byte
-	id   []byte
 	ip   string
 }
 
 func (k *keySet) print() {
-	stdout.Printf("priv: %s | pub: %s | nodeid: %s | ip: %s\n",
+	stdout.Printf("priv: %s | pub: %s | ip: %s\n",
 		hex.EncodeToString(k.priv[:]),
 		hex.EncodeToString(k.pub[:]),
-		hex.EncodeToString(k.id[:]),
 		k.ip)
 }
 
 func doBoxKeys(out chan<- keySet) {
 	for {
-		pub, priv := crypto.NewBoxKeys()
-		id := crypto.GetNodeID(pub)
-		ip := net.IP(addrForNodeID(id)[:]).String()
-		out <- keySet{priv[:], pub[:], id[:], ip}
+		pub, priv := generateKey()
+		ip := net.IP(addrForKey(pub)[:]).String()
+		out <- keySet{priv[:], pub[:], ip}
 	}
 }
 
-func isBetter(oldID, newID []byte) bool {
-	for i := range oldID {
-		if newID[i] > oldID[i] {
+func isBetter(oldPub, newPub ed25519.PublicKey) bool {
+	for i := range oldPub {
+		if newPub[i] < oldPub[i] {
 			return true
 		}
-		if newID[i] < oldID[i] {
-			return false
+		if newPub[i] > oldPub[i] {
+			break
 		}
 	}
 	return false
