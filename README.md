@@ -3,7 +3,7 @@
 This program reimplements
 [SimpleYggGen](https://notabug.org/acetone/SimpleYggGen-Bash) in Go, importing
 the original Yggdrasil code for generating keys and utilizing multiple CPU
-threads for mining.
+threads for mining. It is based on `cmd/genkeys` from yggdrasil-go.
 
 ### Installation
 
@@ -56,13 +56,10 @@ his implementation was that it ran grep and yggdrasil as separate processes,
 making mining very slow. Even though @acetone later made a C++ implementation,
 it still relied on running Yggdrasil as a separate process.
 
-As of now (2020-08-24) @acetone reworked his C++ miner implementation, and
+As of August 2020 @acetone reworked his C++ miner implementation, and
 [SYG-C++](https://notabug.org/acetone/SimpleYggGen-CPP) is a lot more performant
-than this program, making 4 times more iterations in the same time. If you're
-using Windows, it might be feasible to use his program instead.
-
-There's also a CUDA miner by @frodo_baggins available
-[here](https://notabug.org/frodo_buggins/ygg-brute).
+than this program, making 4 times more iterations in the same time. It might be feasible to use his program instead unless you're running an architecture
+where SYG-C++ won't build.
 
 ### Performance
 
