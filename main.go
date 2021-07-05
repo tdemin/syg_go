@@ -22,8 +22,8 @@ import (
 
 var (
 	programName = "syg_go"
-	version     = "v0.1.4"
-	copyright   = "Copyright (c) 2020 Timur Demin"
+	version     = "v0+HEAD"
+	copyright   = "Copyright (c) 2021 Timur Demin"
 )
 
 var (
