@@ -25,9 +25,6 @@ changelog:
     - '^test:'
 
 release:
-  gitea:
+  github:
     owner: tdemin
     name: syg_go
-
-gitea_urls:
-  api: https://git.tdem.in/api/v1/

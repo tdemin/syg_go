@@ -1,4 +1,4 @@
-module git.tdem.in/tdemin/syg_go
+module github.com/tdemin/syg_go
 
 go 1.16
 

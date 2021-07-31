@@ -7,7 +7,7 @@ threads for mining. It is based on `cmd/genkeys` from yggdrasil-go.
 
 ### Installation
 
-`% go get -u -v git.tdem.in/tdemin/syg_go`
+`% go get -u -v github.com/tdemin/syg_go`
 
 If you're an Arch Linux user, you can install it from
 [AUR](https://aur.archlinux.org/packages/syg_go/):
